@@ -61,6 +61,18 @@ public class FileStorageService {
         return safeName;
     }
 
+    public Path getActiveUploadRoot() {
+        return uploadRoot;
+    }
+
+    public Path getConfiguredUploadRoot() {
+        return configuredUploadRoot;
+    }
+
+    public boolean isUsingFallbackStorage() {
+        return usingFallbackStorage;
+    }
+
     private UploadRootSelection initializeUploadRoot(Path configuredRoot) {
         if (ensureWritableDirectory(configuredRoot)) {
             return new UploadRootSelection(configuredRoot, false);

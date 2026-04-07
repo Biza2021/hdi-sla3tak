@@ -1,26 +1,31 @@
 package com.hdisla3tak.app.config;
 
+import com.hdisla3tak.app.service.FileStorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final AppProperties appProperties;
+    private static final Logger log = LoggerFactory.getLogger(WebConfig.class);
+    private final FileStorageService fileStorageService;
 
-    public WebConfig(AppProperties appProperties) {
-        this.appProperties = appProperties;
+    public WebConfig(FileStorageService fileStorageService) {
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadPath = Paths.get(appProperties.getStorage().getUploadDir()).toAbsolutePath().normalize();
+        Path uploadPath = fileStorageService.getActiveUploadRoot();
         String location = uploadPath.toUri().toString();
+        log.info("Serving /uploads/** from {} (configured path: {}, using fallback storage: {})",
+            uploadPath, fileStorageService.getConfiguredUploadRoot(), fileStorageService.isUsingFallbackStorage());
         registry.addResourceHandler("/uploads/**").addResourceLocations(location);
     }
 
