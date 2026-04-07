@@ -24,6 +24,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         Path uploadPath = fileStorageService.getActiveUploadRoot();
         String location = uploadPath.toUri().toString();
+        if (!location.endsWith("/")) {
+            location = location + "/";
+        }
         log.info("Serving /uploads/** from {} (configured path: {}, using fallback storage: {})",
             uploadPath, fileStorageService.getConfiguredUploadRoot(), fileStorageService.isUsingFallbackStorage());
         registry.addResourceHandler("/uploads/**").addResourceLocations(location);
