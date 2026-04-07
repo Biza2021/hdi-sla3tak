@@ -29,9 +29,13 @@ public class FileStorageService {
 
     public FileStorageService(AppProperties properties) {
         this.configuredUploadRoot = Paths.get(properties.getStorage().getUploadDir()).toAbsolutePath().normalize();
+        logPathState("Configured upload path before initialization", configuredUploadRoot);
         UploadRootSelection selection = initializeUploadRoot(configuredUploadRoot);
         this.uploadRoot = selection.path();
         this.usingFallbackStorage = selection.fallback();
+        logPathState("Configured upload path after initialization", configuredUploadRoot);
+        logPathState("Fallback upload path", FALLBACK_UPLOAD_ROOT);
+        logPathState("Active upload path", uploadRoot);
         log.info("Upload storage configured path: {}, active path: {}, using fallback storage: {}",
             configuredUploadRoot, uploadRoot, usingFallbackStorage);
     }
@@ -87,10 +91,26 @@ public class FileStorageService {
     private boolean ensureWritableDirectory(Path directory) {
         try {
             Files.createDirectories(directory);
+            logPathState("Writable path probe", directory);
             return true;
         } catch (Exception ex) {
+            log.warn("Upload path probe failed for {} (exists={}, isDirectory={}, isWritable={})",
+                directory,
+                Files.exists(directory),
+                Files.isDirectory(directory),
+                Files.isWritable(directory),
+                ex);
             return false;
         }
+    }
+
+    private void logPathState(String label, Path directory) {
+        log.info("{}: {} (exists={}, isDirectory={}, isWritable={})",
+            label,
+            directory,
+            Files.exists(directory),
+            Files.isDirectory(directory),
+            Files.isWritable(directory));
     }
 
     private record UploadRootSelection(Path path, boolean fallback) {

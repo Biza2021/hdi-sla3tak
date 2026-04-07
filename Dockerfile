@@ -15,8 +15,6 @@ RUN useradd --system --uid 1001 --create-home appuser \
 
 COPY --from=build /workspace/target/*.jar /app/app.jar
 
-USER appuser
-
 EXPOSE 8080
 
 ENV JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75
