@@ -1,6 +1,8 @@
 package com.hdisla3tak.app.service;
 
 import com.hdisla3tak.app.config.AppProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,12 +18,16 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
+    private static final Logger log = LoggerFactory.getLogger(FileStorageService.class);
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp", "image/gif");
+    private static final Path FALLBACK_UPLOAD_ROOT = Paths.get(System.getProperty("java.io.tmpdir"), "hdi-sla3tak", "uploads", "items")
+        .toAbsolutePath()
+        .normalize();
     private final Path uploadRoot;
 
-    public FileStorageService(AppProperties properties) throws IOException {
-        this.uploadRoot = Paths.get(properties.getStorage().getUploadDir()).toAbsolutePath().normalize();
-        Files.createDirectories(uploadRoot);
+    public FileStorageService(AppProperties properties) {
+        Path configuredRoot = Paths.get(properties.getStorage().getUploadDir()).toAbsolutePath().normalize();
+        this.uploadRoot = initializeUploadRoot(configuredRoot);
     }
 
     public String storeImage(MultipartFile file) {
@@ -39,10 +45,31 @@ public class FileStorageService {
         String safeName = UUID.randomUUID() + (extension != null ? "." + extension.toLowerCase() : "");
         Path target = uploadRoot.resolve(safeName);
         try {
+            Files.createDirectories(uploadRoot);
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new IllegalStateException("Could not save image.", e);
         }
         return safeName;
+    }
+
+    private Path initializeUploadRoot(Path configuredRoot) {
+        if (ensureWritableDirectory(configuredRoot)) {
+            return configuredRoot;
+        }
+        if (ensureWritableDirectory(FALLBACK_UPLOAD_ROOT)) {
+            log.warn("Using fallback upload directory {} because configured directory {} is not writable.", FALLBACK_UPLOAD_ROOT, configuredRoot);
+            return FALLBACK_UPLOAD_ROOT;
+        }
+        throw new IllegalStateException("Could not initialize an upload directory.");
+    }
+
+    private boolean ensureWritableDirectory(Path directory) {
+        try {
+            Files.createDirectories(directory);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }
