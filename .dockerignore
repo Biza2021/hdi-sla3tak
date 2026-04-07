@@ -1,0 +1,9 @@
+target
+.git
+.idea
+.vscode
+data
+uploads
+*.log
+*.iml
+.DS_Store

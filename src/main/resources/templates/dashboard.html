@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="row g-3 g-lg-4 mb-3 mb-lg-4">
+        <div class="col-6 col-xl-3" th:each="entry : ${stats}">
+            <div class="metric-card">
+                <div class="metric-label" th:text="${entry.key}">Metric</div>
+                <div class="metric-value" th:text="${entry.value}">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 g-lg-4">
+        <div class="col-lg-7">
+            <div class="card-surface p-4 h-100">
+                <h3 class="section-title" th:text="#{dashboard.workflow}">How the team should use the app</h3>
+                <ol class="workflow-list mb-4">
+                    <li th:text="#{dashboard.step1}">Find or create the customer.</li>
+                    <li th:text="#{dashboard.step2}">Register the item and take a photo.</li>
+                    <li th:text="#{dashboard.step3}">Share the pickup code with the customer.</li>
+                    <li th:text="#{dashboard.step4}">Update repair status during the work.</li>
+                    <li th:text="#{dashboard.step5}">Use phone + photo + pickup code when delivering.</li>
+                </ol>
+                <div class="d-grid gap-2 d-md-flex">
+                    <a class="btn btn-primary rounded-pill" th:href="@{/customers/new}" th:text="#{dashboard.addCustomer}">Add customer</a>
+                    <a class="btn btn-dark rounded-pill" th:href="@{/items/new}" th:text="#{dashboard.addRepair}">Register repair item</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card-surface p-4 h-100">
+                <h3 class="section-title" th:text="#{dashboard.quickChecks}">Quick checks</h3>
+                <div class="stacked-action-list">
+                    <a class="history-link" th:href="@{/items/delivery}">
+                        <div class="fw-semibold" th:text="#{dashboard.deliveryVerify}">Verify delivery</div>
+                        <div class="small text-secondary" th:text="#{dashboard.deliveryVerifyHint}">Use phone, photo, and pickup code before handover.</div>
+                    </a>
+                    <a class="history-link" th:href="@{/items(status='READY_FOR_PICKUP')}">
+                        <div class="fw-semibold" th:text="#{dashboard.readyItems}">Ready for pickup</div>
+                        <div class="small text-secondary" th:text="#{dashboard.readyItemsHint}">Open items already waiting for customer pickup.</div>
+                    </a>
+                    <a class="history-link" th:href="@{/items(delivered='false')}">
+                        <div class="fw-semibold" th:text="#{dashboard.activeJobs}">Open jobs</div>
+                        <div class="small text-secondary" th:text="#{dashboard.activeJobsHint}">See everything still inside the workshop.</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</html>

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<div th:fragment="content">
+    <div class="card-surface p-5 text-center">
+        <h2>Something went wrong</h2>
+        <p class="text-secondary">Please go back or restart the server if you are developing locally.</p>
+        <a class="btn btn-primary rounded-pill" th:href="@{/}">Go back home</a>
+    </div>
+</div>
+</html>

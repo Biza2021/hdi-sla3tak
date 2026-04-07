@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="card-surface p-3 p-lg-4">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-12 col-lg-9">
+                <input class="form-control soft-input" name="q" th:value="${q}" th:placeholder="#{delivery.searchPlaceholder}">
+            </div>
+            <div class="col-12 col-lg-3 d-grid">
+                <button class="btn btn-primary rounded-pill" th:text="#{delivery.findItem}">Find item</button>
+            </div>
+        </form>
+
+        <div class="alert alert-info rounded-4 border-0" th:if="${q != null and !#strings.isEmpty(q)}" th:text="#{delivery.rule}">
+            Verify the customer using pickup code + phone + item photo.
+        </div>
+
+        <div class="row g-3" th:if="${!#lists.isEmpty(results)}">
+            <div class="col-12" th:each="item : ${results}">
+                <div class="app-card p-3">
+                    <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center">
+                        <img class="item-thumb" th:src="${item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="item">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold" th:text="${item.title}"></div>
+                            <div class="small text-secondary" th:text="${item.customer.fullName + ' - ' + item.customer.phoneNumber}"></div>
+                            <div class="small text-secondary" th:text="|#{items.pickupCode}: ${item.pickupCode} - ${@labels.status(item.status)}|"></div>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a class="btn btn-outline-dark rounded-pill" th:href="@{/items/{id}(id=${item.id})}" th:text="#{action.view}">View</a>
+                            <a class="btn btn-primary rounded-pill" th:if="${!item.delivered}" th:href="@{/items/{id}/deliver(id=${item.id})}" th:text="#{delivery.confirmDelivery}">Confirm delivery</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="empty-inline" th:if="${#lists.isEmpty(results) and q != null and !#strings.isEmpty(q)}" th:text="#{delivery.noResults}">No items matched that search.</div>
+    </div>
+</section>
+</html>

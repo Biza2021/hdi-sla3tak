@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      APP_STORAGE_UPLOAD_DIR: /app/uploads/items
+      SPRING_THYMELEAF_CACHE: "true"
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
+    volumes:
+      - hdi-data:/app/data
+      - hdi-uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  hdi-data:
+  hdi-uploads:

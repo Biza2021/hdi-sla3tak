@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="row g-3 g-lg-4">
+        <div class="col-lg-5">
+            <div class="card-surface p-4 h-100">
+                <img class="detail-image mb-3" th:src="${item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="item">
+                <div class="detail-row"><span th:text="#{items.customer}">Customer</span><strong th:text="${item.customer.fullName}"></strong></div>
+                <div class="detail-row"><span th:text="#{customers.phone}">Phone</span><strong th:text="${item.customer.phoneNumber}"></strong></div>
+                <div class="detail-row"><span th:text="#{items.pickupCode}">Pickup code</span><strong th:text="${item.pickupCode}"></strong></div>
+                <div class="detail-row"><span th:text="#{items.category}">Category</span><strong th:text="${@labels.category(item.category)}"></strong></div>
+                <div class="detail-row"><span th:text="#{items.status}">Status</span><span class="status-chip" th:classappend="${' status-' + #strings.replace(item.status.name().toLowerCase(), '_', '-')}" th:text="${@labels.status(item.status)}"></span></div>
+                <div class="detail-row"><span th:text="#{items.financial}">Financial</span><strong th:text="${item.remainingBalance != null ? item.remainingBalance + ' MAD' : '-'}"></strong></div>
+                <div class="detail-row">
+                    <span th:text="#{track.internal.link}">Tracking link</span>
+                    <div class="text-end">
+                        <a th:href="${trackingUrl}" target="_blank" rel="noopener" th:text="#{track.internal.open}">Open public page</a>
+                        <div class="small text-secondary text-break mt-1" th:text="${trackingUrl}"></div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap mt-3">
+                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/items/{id}/edit(id=${item.id})}" th:text="#{action.edit}">Edit</a>
+                    <a class="btn btn-primary rounded-pill" th:if="${!item.delivered}" th:href="@{/items/{id}/deliver(id=${item.id})}" th:text="#{items.markDelivered}">Deliver item</a>
+                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/items/{id}/receipt(id=${item.id})}" th:text="#{items.printReceipt}">Print receipt</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card-surface p-4 mb-3" th:if="${smsComposeAction != null}"
+                 id="sms-compose-card"
+                 th:attr="data-sms-url=${smsComposeAction.smsUrl},
+                          data-message=${smsComposeAction.messageText},
+                          data-tracking-url=${smsComposeAction.trackingUrl},
+                          data-copied-message=#{sms.compose.copiedMessage},
+                          data-copied-tracking=#{sms.compose.copiedTracking},
+                          data-copy-message-fallback=#{sms.compose.copyMessageFallback},
+                          data-copy-tracking-fallback=#{sms.compose.copyTrackingFallback}">
+                <h3 class="section-title" th:text="#{sms.compose.title}">SMS to customer</h3>
+                <p class="mb-2" th:text="#{sms.compose.help}">We prepared the customer message. If the SMS app does not open, use the buttons below.</p>
+                <div class="small text-secondary mb-2">
+                    <span th:text="#{customers.phone}">Phone</span>:
+                    <span th:text="${smsComposeAction.recipientPhoneNumber}"></span>
+                </div>
+                <div class="small text-secondary text-break mb-3" th:text="${smsComposeAction.messageText}"></div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-outline-dark rounded-pill" data-open-sms-link th:href="${smsComposeAction.smsUrl}" th:text="#{sms.compose.open}">Open SMS app</a>
+                    <button class="btn btn-outline-dark rounded-pill" type="button" data-copy-target="message" th:text="#{sms.compose.copyMessage}">Copy message</button>
+                    <button class="btn btn-outline-dark rounded-pill" type="button" data-copy-target="tracking" th:text="#{sms.compose.copyTracking}">Copy tracking link</button>
+                </div>
+                <div class="small text-secondary mt-3 text-break">
+                    <span th:text="#{track.internal.link}">Tracking link</span>:
+                    <span th:text="${smsComposeAction.trackingUrl}"></span>
+                </div>
+                <div class="small text-secondary mt-2" data-copy-status th:text="#{sms.compose.autoLaunchHint}">We will try to open your device's SMS app automatically on mobile.</div>
+            </div>
+            <div class="card-surface p-4 mb-3">
+                <h3 class="section-title" th:text="#{items.description}">Description</h3>
+                <p class="mb-0" th:text="${item.description ?: @labels.msg('items.noDescription')}"></p>
+            </div>
+            <div class="card-surface p-4 mb-3">
+                <h3 class="section-title" th:text="#{items.repairNotes}">Repair notes</h3>
+                <p class="mb-0" th:text="${item.repairNotes ?: @labels.msg('items.noNotes')}"></p>
+            </div>
+            <div class="card-surface p-4">
+                <h3 class="section-title" th:text="#{items.history}">History</h3>
+                <div class="timeline" th:if="${!#lists.isEmpty(item.historyEntries)}">
+                    <div class="timeline-item" th:each="entry : ${item.historyEntries}">
+                        <div class="timeline-dot"></div>
+                        <div>
+                            <div class="fw-semibold" th:text="${@labels.historyMessage(entry)}"></div>
+                            <div class="small text-secondary" th:text="${@labels.historyAction(entry.actionType) + ' - ' + #temporals.format(entry.createdAt, 'yyyy-MM-dd HH:mm') + (entry.actorName != null ? ' - ' + entry.actorName : '')}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="empty-inline" th:if="${#lists.isEmpty(item.historyEntries)}" th:text="#{items.noHistory}">No history yet.</div>
+            </div>
+        </div>
+    </div>
+    <script th:if="${smsComposeAction != null}" th:inline="javascript">
+        /*<![CDATA[*/
+        (() => {
+            const card = document.getElementById('sms-compose-card');
+            if (!card) {
+                return;
+            }
+
+            const smsUrl = card.dataset.smsUrl;
+            const messageText = card.dataset.message;
+            const trackingUrl = card.dataset.trackingUrl;
+            const copiedMessageLabel = card.dataset.copiedMessage;
+            const copiedTrackingLabel = card.dataset.copiedTracking;
+            const copyMessageFallback = card.dataset.copyMessageFallback;
+            const copyTrackingFallback = card.dataset.copyTrackingFallback;
+            const status = card.querySelector('[data-copy-status]');
+            const openLink = card.querySelector('[data-open-sms-link]');
+
+            const updateStatus = (text) => {
+                if (status && text) {
+                    status.textContent = text;
+                }
+            };
+
+            const copyText = async (text, successText, fallbackLabel) => {
+                if (!text) {
+                    return;
+                }
+                if (navigator.clipboard && window.isSecureContext) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        updateStatus(successText);
+                        return;
+                    } catch (error) {
+                    }
+                }
+                window.prompt(fallbackLabel, text);
+            };
+
+            card.querySelectorAll('[data-copy-target]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    if (button.dataset.copyTarget === 'message') {
+                        void copyText(messageText, copiedMessageLabel, copyMessageFallback);
+                        return;
+                    }
+                    void copyText(trackingUrl, copiedTrackingLabel, copyTrackingFallback);
+                });
+            });
+
+            const userAgent = navigator.userAgent || '';
+            const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(userAgent);
+            const launchUrl = /iPhone|iPad|iPod/i.test(userAgent) && smsUrl
+                ? smsUrl.replace('?body=', '&body=')
+                : smsUrl;
+
+            if (openLink && launchUrl) {
+                openLink.setAttribute('href', launchUrl);
+            }
+
+            if (isMobileDevice && launchUrl) {
+                window.setTimeout(() => {
+                    window.location.href = launchUrl;
+                }, 250);
+            }
+        })();
+        /*]]>*/
+    </script>
+</section>
+</html>

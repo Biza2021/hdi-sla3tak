@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="row g-3 g-lg-4">
+        <div class="col-lg-4">
+            <div class="card-surface p-4 h-100">
+                <h3 class="section-title" th:text="#{customers.profile}">Customer profile</h3>
+                <div class="detail-row"><span th:text="#{customers.fullName}">Full name</span><strong th:text="${customer.fullName}"></strong></div>
+                <div class="detail-row"><span th:text="#{customers.phone}">Phone</span><strong th:text="${customer.phoneNumber}"></strong></div>
+                <div class="detail-row" th:if="${customer.secondaryPhoneNumber}"><span th:text="#{customers.secondaryPhone}">Secondary</span><strong th:text="${customer.secondaryPhoneNumber}"></strong></div>
+                <div class="detail-row"><span th:text="#{customers.createdAt}">Created</span><strong th:text="${#temporals.format(customer.createdAt, 'yyyy-MM-dd HH:mm')}"></strong></div>
+                <div class="mt-3 d-flex gap-2 flex-wrap">
+                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/customers/{id}/edit(id=${customer.id})}" th:text="#{action.edit}">Edit</a>
+                    <a class="btn btn-primary rounded-pill" th:href="@{/items/new(customerId=${customer.id})}" th:text="#{customers.newRepair}">New repair</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card-surface p-4 mb-3">
+                <h3 class="section-title" th:text="#{customers.notes}">Notes</h3>
+                <p class="mb-0" th:text="${customer.notes ?: @labels.msg('customers.noNotes')}"></p>
+            </div>
+            <div class="card-surface p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-title mb-0" th:text="#{customers.repairHistory}">Repair history</h3>
+                    <span class="small text-secondary" th:text="#{customers.repairsCount(${#lists.size(customer.repairItems)})}">0 repairs</span>
+                </div>
+                <div class="vstack gap-3" th:if="${!#lists.isEmpty(customer.repairItems)}">
+                    <a class="history-link" th:each="item : ${customer.repairItems}" th:href="@{/items/{id}(id=${item.id})}">
+                        <div class="d-flex justify-content-between gap-3 align-items-start">
+                            <div>
+                                <div class="fw-semibold" th:text="${item.title}">Item title</div>
+                                <div class="small text-secondary" th:text="${@labels.category(item.category)} + ' - ' + item.pickupCode"></div>
+                            </div>
+                            <span class="status-chip" th:classappend="${' status-' + #strings.replace(item.status.name().toLowerCase(), '_', '-')}" th:text="${@labels.status(item.status)}">Status</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="empty-inline" th:if="${#lists.isEmpty(customer.repairItems)}" th:text="#{customers.noRepairs}">No repairs yet.</div>
+            </div>
+        </div>
+    </div>
+</section>
+</html>

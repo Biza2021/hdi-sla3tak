@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: Hdi Sla3tak
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+  thymeleaf:
+    cache: false
+  datasource:
+    url: jdbc:h2:file:./data/hdisla3takdb;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+server:
+  error:
+    whitelabel:
+      enabled: false
+app:
+  storage:
+    upload-dir: ${APP_STORAGE_UPLOAD_DIR:uploads/items}
+  sms:
+    enabled: ${APP_SMS_ENABLED:true}
+    mode: ${APP_SMS_MODE:device-link}
+    base-url: ${APP_SMS_BASE_URL:}
+  notifications:
+    enabled: ${APP_NOTIFICATIONS_ENABLED:false}
+    provider: ${APP_NOTIFICATIONS_PROVIDER:log}
+    whatsapp-from: ${APP_NOTIFICATIONS_WHATSAPP_FROM:whatsapp:+14155238886}
+    twilio-account-sid: ${APP_NOTIFICATIONS_TWILIO_ACCOUNT_SID:}
+    twilio-auth-token: ${APP_NOTIFICATIONS_TWILIO_AUTH_TOKEN:}

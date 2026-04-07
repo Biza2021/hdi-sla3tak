@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="card-surface p-3 p-lg-4">
+        <form class="row g-2 align-items-center mb-3" method="get">
+            <div class="col-12 col-md">
+                <input name="q" class="form-control soft-input" th:value="${q}" th:placeholder="#{customers.searchPlaceholder}">
+            </div>
+            <div class="col-6 col-md-auto">
+                <button class="btn btn-dark w-100 rounded-pill" th:text="#{action.search}">Search</button>
+            </div>
+            <div class="col-6 col-md-auto">
+                <a class="btn btn-primary w-100 rounded-pill" th:href="@{/customers/new}" th:text="#{customers.add}">Add customer</a>
+            </div>
+        </form>
+
+        <div class="row g-3" th:if="${!#lists.isEmpty(customers)}">
+            <div class="col-12 col-lg-6" th:each="customer : ${customers}">
+                <div class="app-card p-3 h-100">
+                    <div class="d-flex justify-content-between gap-3 align-items-start">
+                        <div>
+                            <div class="fw-semibold" th:text="${customer.fullName}">Name</div>
+                            <div class="small text-secondary" th:text="${customer.phoneNumber}">Phone</div>
+                            <div class="small text-secondary" th:if="${customer.secondaryPhoneNumber}" th:text="${customer.secondaryPhoneNumber}"></div>
+                            <div class="small text-secondary mt-2" th:text="#{customers.repairsCount(${#lists.size(customer.repairItems)})}">0 repairs</div>
+                        </div>
+                        <a class="btn btn-sm btn-outline-dark rounded-pill" th:href="@{/customers/{id}(id=${customer.id})}" th:text="#{action.view}">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="empty-inline" th:if="${#lists.isEmpty(customers)}" th:text="#{customers.empty}">No customers yet.</div>
+    </div>
+</section>
+</html>

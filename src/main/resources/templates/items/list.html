@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="card-surface p-3 p-lg-4">
+        <form class="row g-2 align-items-center mb-3" method="get">
+            <div class="col-12">
+                <input name="q" class="form-control soft-input" th:value="${q}" th:placeholder="#{items.searchPlaceholder}">
+            </div>
+            <div class="col-6 col-md-3">
+                <select class="form-select soft-input" name="status">
+                    <option value="" th:text="#{filters.allStatuses}">All statuses</option>
+                    <option th:each="status : ${repairStatuses}" th:value="${status}" th:selected="${selectedStatus == status}" th:text="${@labels.status(status)}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select class="form-select soft-input" name="category">
+                    <option value="" th:text="#{filters.allCategories}">All categories</option>
+                    <option th:each="category : ${itemCategories}" th:value="${category}" th:selected="${selectedCategory == category.name()}" th:text="${@labels.category(category)}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select class="form-select soft-input" name="delivered">
+                    <option value="" th:selected="${selectedDelivered == ''}" th:text="#{filters.deliveryAny}">Delivery: any</option>
+                    <option value="false" th:selected="${selectedDelivered == 'false'}" th:text="#{filters.notDelivered}">Not delivered</option>
+                    <option value="true" th:selected="${selectedDelivered == 'true'}" th:text="#{filters.delivered}">Delivered</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3 d-grid">
+                <button class="btn btn-dark rounded-pill" th:text="#{action.search}">Search</button>
+            </div>
+        </form>
+
+        <div class="d-grid gap-3" th:if="${!#lists.isEmpty(items)}">
+            <div class="app-card p-3" th:each="item : ${items}">
+                <div class="d-flex gap-3 align-items-start">
+                    <img class="item-thumb" th:src="${item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="item">
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex justify-content-between gap-2 align-items-start flex-wrap">
+                            <div>
+                                <div class="fw-semibold" th:text="${item.title}">Item title</div>
+                                <div class="small text-secondary" th:text="${item.customer.fullName + ' - ' + item.customer.phoneNumber}"></div>
+                                <div class="small text-secondary" th:text="${@labels.category(item.category)} + ' - ' + item.pickupCode"></div>
+                            </div>
+                            <span class="status-chip" th:classappend="${' status-' + #strings.replace(item.status.name().toLowerCase(), '_', '-')}" th:text="${@labels.status(item.status)}">Status</span>
+                        </div>
+                        <div class="small text-secondary mt-2" th:text="#{items.receivedOn(${#temporals.format(item.dateReceived, 'yyyy-MM-dd')})}">Received</div>
+                        <div class="d-flex gap-2 flex-wrap mt-3">
+                            <a class="btn btn-sm btn-outline-dark rounded-pill" th:href="@{/items/{id}(id=${item.id})}" th:text="#{action.view}">View</a>
+                            <a class="btn btn-sm btn-outline-dark rounded-pill" th:href="@{/items/{id}/edit(id=${item.id})}" th:text="#{action.edit}">Edit</a>
+                            <a class="btn btn-sm btn-primary rounded-pill" th:if="${!item.delivered}" th:href="@{/items/{id}/deliver(id=${item.id})}" th:text="#{items.markDelivered}">Deliver</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="empty-inline" th:if="${#lists.isEmpty(items)}" th:text="#{items.empty}">No repair items found.</div>
+    </div>
+</section>
+</html>

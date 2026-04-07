@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="card-surface p-3 p-lg-4">
+        <form th:action="${customer != null} ? '/customers/' + customer.id : '/customers'" th:object="${customerForm}" method="post" class="vstack gap-3">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div>
+                <label class="form-label" th:text="#{customers.fullName}">Full name</label>
+                <input class="form-control soft-input" th:field="*{fullName}">
+                <div class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+            </div>
+            <div>
+                <label class="form-label" th:text="#{customers.phone}">Phone number</label>
+                <input class="form-control soft-input" th:field="*{phoneNumber}">
+                <div class="field-error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+            </div>
+            <div>
+                <label class="form-label" th:text="#{customers.secondaryPhone}">Secondary phone</label>
+                <input class="form-control soft-input" th:field="*{secondaryPhoneNumber}">
+                <div class="field-error" th:if="${#fields.hasErrors('secondaryPhoneNumber')}" th:errors="*{secondaryPhoneNumber}"></div>
+            </div>
+            <div>
+                <label class="form-label" th:text="#{customers.notes}">Notes</label>
+                <textarea class="form-control soft-input" rows="4" th:field="*{notes}"></textarea>
+                <div class="field-error" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}"></div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary rounded-pill px-4" th:text="#{action.save}">Save</button>
+                <a class="btn btn-outline-dark rounded-pill px-4" th:href="@{/customers}" th:text="#{action.cancel}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+</html>

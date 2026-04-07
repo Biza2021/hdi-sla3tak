@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::section})}">
+<section th:fragment="content">
+    <div class="card-surface p-3 p-lg-4">
+        <form th:action="${item != null} ? @{/items/{id}(id=${item.id})} : @{/items}" th:object="${repairItemForm}" method="post" enctype="multipart/form-data" class="vstack gap-3">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" th:text="#{items.customer}">Customer</label>
+                    <select class="form-select soft-input" th:field="*{customerId}">
+                        <option value="" th:text="#{items.selectCustomer}">Select customer</option>
+                        <option th:each="customer : ${customers}" th:value="${customer.id}" th:text="${customer.fullName + ' - ' + customer.phoneNumber}"></option>
+                    </select>
+                    <div class="field-error" th:if="${#fields.hasErrors('customerId')}" th:errors="*{customerId}"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" th:text="#{items.category}">Category</label>
+                    <select class="form-select soft-input" th:field="*{category}">
+                        <option value="" th:text="#{items.selectCategory}">Select category</option>
+                        <option th:each="category : ${itemCategories}" th:value="${category}" th:text="${@labels.category(category)}"></option>
+                    </select>
+                    <div class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" th:text="#{items.itemTitle}">Item title</label>
+                    <input class="form-control soft-input" th:field="*{title}">
+                    <div class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" th:text="#{items.dateReceived}">Date received</label>
+                    <input type="date" class="form-control soft-input" th:field="*{dateReceived}">
+                    <div class="field-error" th:if="${#fields.hasErrors('dateReceived')}" th:errors="*{dateReceived}"></div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" th:text="#{items.description}">Description</label>
+                    <textarea class="form-control soft-input" rows="3" th:field="*{description}"></textarea>
+                    <div class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" th:text="#{items.repairNotes}">Repair notes</label>
+                    <textarea class="form-control soft-input" rows="3" th:field="*{repairNotes}"></textarea>
+                    <div class="field-error" th:if="${#fields.hasErrors('repairNotes')}" th:errors="*{repairNotes}"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" th:text="#{items.status}">Status</label>
+                    <select class="form-select soft-input" th:field="*{status}">
+                        <option th:each="status : ${repairStatuses}" th:value="${status}" th:text="${@labels.status(status)}"></option>
+                    </select>
+                    <div class="field-error" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" th:text="#{items.expectedDelivery}">Expected delivery date</label>
+                    <input type="date" class="form-control soft-input" th:field="*{expectedDeliveryDate}">
+                </div>
+                <div class="col-6 col-md-4">
+                    <label class="form-label" th:text="#{items.estimatedPrice}">Estimated price</label>
+                    <input type="number" step="0.01" class="form-control soft-input" th:field="*{estimatedPrice}">
+                </div>
+                <div class="col-6 col-md-4">
+                    <label class="form-label" th:text="#{items.depositPaid}">Deposit paid</label>
+                    <input type="number" step="0.01" class="form-control soft-input" th:field="*{depositPaid}">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" th:text="#{items.itemImage}">Item image</label>
+                    <input class="form-control soft-input" type="file" name="imageFile" accept="image/*" data-preview-target="#itemPreview">
+                    <div class="field-error" th:if="${uploadError}" th:text="${uploadError}"></div>
+                </div>
+            </div>
+            <div class="preview-box mt-2">
+                <img id="itemPreview" th:src="${item != null and item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="preview">
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary rounded-pill px-4" th:text="#{action.saveItem}">Save item</button>
+                <a class="btn btn-outline-dark rounded-pill px-4" th:href="@{/items}" th:text="#{action.cancel}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</section>
+</html>
