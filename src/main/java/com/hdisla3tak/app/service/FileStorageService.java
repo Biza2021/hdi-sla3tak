@@ -54,12 +54,45 @@ public class FileStorageService {
         String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
         String safeName = UUID.randomUUID() + (extension != null ? "." + extension.toLowerCase() : "");
         Path target = uploadRoot.resolve(safeName);
+        boolean directoryExistsBeforeSave = Files.exists(uploadRoot);
+        boolean directoryIsDirectoryBeforeSave = Files.isDirectory(uploadRoot);
+        boolean directoryIsWritableBeforeSave = Files.isWritable(uploadRoot);
+        log.info(
+            "Image upload attempt: originalFilename={}, storedFilename={}, activeUploadDir={}, targetPath={}, dirExistsBeforeSave={}, dirIsDirectoryBeforeSave={}, dirIsWritableBeforeSave={}",
+            file.getOriginalFilename(),
+            safeName,
+            uploadRoot,
+            target.toAbsolutePath().normalize(),
+            directoryExistsBeforeSave,
+            directoryIsDirectoryBeforeSave,
+            directoryIsWritableBeforeSave
+        );
         try {
             Files.createDirectories(uploadRoot);
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-            log.info("Saved uploaded image to {} (success=true)", target.toAbsolutePath().normalize());
+            boolean fileExistsAfterSave = Files.exists(target);
+            Long fileSizeAfterSaveBytes = fileExistsAfterSave ? Files.size(target) : null;
+            log.info(
+                "Image upload saved successfully: originalFilename={}, storedFilename={}, activeUploadDir={}, targetPath={}, fileExistsAfterSave={}, fileSizeAfterSaveBytes={}",
+                file.getOriginalFilename(),
+                safeName,
+                uploadRoot,
+                target.toAbsolutePath().normalize(),
+                fileExistsAfterSave,
+                fileSizeAfterSaveBytes
+            );
         } catch (IOException e) {
-            log.error("Failed to save uploaded image to {} (success=false)", target.toAbsolutePath().normalize(), e);
+            log.error(
+                "Image upload failed: originalFilename={}, storedFilename={}, activeUploadDir={}, targetPath={}, dirExistsBeforeSave={}, dirIsDirectoryBeforeSave={}, dirIsWritableBeforeSave={}",
+                file.getOriginalFilename(),
+                safeName,
+                uploadRoot,
+                target.toAbsolutePath().normalize(),
+                directoryExistsBeforeSave,
+                directoryIsDirectoryBeforeSave,
+                directoryIsWritableBeforeSave,
+                e
+            );
             throw new IllegalStateException("Could not save image.", e);
         }
         return safeName;
