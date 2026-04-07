@@ -32,7 +32,8 @@ public class CustomerService {
 
     public Customer create(CustomerForm form) {
         validatePhone(form.getPhoneNumber());
-        if (customerRepository.existsByPhoneNumber(form.getPhoneNumber().trim())) {
+        String normalizedPhone = normalizePhone(form.getPhoneNumber());
+        if (hasDuplicatePrimaryPhone(normalizedPhone, null)) {
             throw new IllegalArgumentException("duplicate-phone");
         }
         Customer customer = new Customer();
@@ -42,7 +43,8 @@ public class CustomerService {
 
     public Customer update(Long id, CustomerForm form) {
         validatePhone(form.getPhoneNumber());
-        if (customerRepository.existsByPhoneNumberAndIdNot(form.getPhoneNumber().trim(), id)) {
+        String normalizedPhone = normalizePhone(form.getPhoneNumber());
+        if (hasDuplicatePrimaryPhone(normalizedPhone, id)) {
             throw new IllegalArgumentException("duplicate-phone");
         }
         Customer customer = getById(id);
@@ -61,6 +63,18 @@ public class CustomerService {
         if (phone == null || !phone.matches("^[0-9()+ -]{8,20}$")) {
             throw new IllegalArgumentException("invalid-phone");
         }
+    }
+
+    private boolean hasDuplicatePrimaryPhone(String normalizedPhone, Long currentCustomerId) {
+        return customerRepository.findAll().stream()
+            .filter(customer -> currentCustomerId == null || !customer.getId().equals(currentCustomerId))
+            .map(Customer::getPhoneNumber)
+            .map(this::normalizePhone)
+            .anyMatch(normalizedPhone::equals);
+    }
+
+    private String normalizePhone(String phone) {
+        return phone == null ? "" : phone.replaceAll("[()\\s-]", "");
     }
 
     private String trimToNull(String value) {

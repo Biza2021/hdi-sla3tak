@@ -15,7 +15,7 @@
 <div class="app-shell">
     <header class="topbar d-lg-none">
         <div class="container-fluid d-flex align-items-center justify-content-between gap-2 py-3">
-            <div class="brand-mark">HS</div>
+            <div class="brand-mark"><img class="brand-logo" th:src="@{/img/logo.png}" alt="Logo"></div>
             <div class="text-center flex-grow-1">
                 <div class="fw-semibold" th:text="${appDisplayName}">Hdi Sla3tak</div>
                 <div class="small text-secondary" th:text="#{layout.mobileSubtitle}">Repair flow</div>
@@ -60,7 +60,7 @@
 
     <aside class="sidebar d-none d-lg-flex flex-column" th:fragment="sidebar">
         <div class="p-4 border-bottom border-white border-opacity-10">
-            <div class="brand-mark mb-2">HS</div>
+            <div class="brand-mark mb-2"><img class="brand-logo" th:src="@{/img/logo.png}" alt="Logo"></div>
             <h4 class="mb-1" th:text="${appDisplayName}">Hdi Sla3tak</h4>
             <p class="text-white-50 mb-0" th:text="#{layout.sidebarSubtitle}">Repair workflow</p>
         </div>

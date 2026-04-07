@@ -58,7 +58,7 @@ public class CustomerController {
             redirectAttributes.addFlashAttribute("success", messageSource.getMessage("flash.customer.created", null, locale));
             return "redirect:/customers/" + customer.getId();
         } catch (IllegalArgumentException ex) {
-            String key = "duplicate-phone".equals(ex.getMessage()) ? "flash.customer.duplicatePhone" : "validation.customer.phone.invalid";
+            String key = "duplicate-phone".equals(ex.getMessage()) ? "validation.customer.phone.duplicate" : "validation.customer.phone.invalid";
             bindingResult.rejectValue("phoneNumber", "phone", messageSource.getMessage(key, null, locale));
             model.addAttribute("pageTitleKey", "customers.create.title");
             model.addAttribute("pageSubtitleKey", "customers.create.subtitle");
@@ -108,7 +108,7 @@ public class CustomerController {
             redirectAttributes.addFlashAttribute("success", messageSource.getMessage("flash.customer.updated", null, locale));
             return "redirect:/customers/" + id;
         } catch (IllegalArgumentException ex) {
-            String key = "duplicate-phone".equals(ex.getMessage()) ? "flash.customer.duplicatePhoneOther" : "validation.customer.phone.invalid";
+            String key = "duplicate-phone".equals(ex.getMessage()) ? "validation.customer.phone.duplicate" : "validation.customer.phone.invalid";
             bindingResult.rejectValue("phoneNumber", "phone", messageSource.getMessage(key, null, locale));
             model.addAttribute("customer", customerService.getById(id));
             model.addAttribute("pageTitleKey", "customers.edit.title");
