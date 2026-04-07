@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.util.StringUtils;
 
 import java.util.Locale;
 
@@ -78,7 +79,8 @@ public class AdminUserController {
                          RedirectAttributes redirectAttributes,
                          Model model,
                          Locale locale) {
-        if (userRepository.existsByUsernameIgnoreCase(userForm.getUsername())) {
+        String username = normalizeUsername(userForm.getUsername());
+        if (username != null && userRepository.existsByUsernameIgnoreCase(username)) {
             bindingResult.rejectValue("username", "username", messageSource.getMessage("validation.user.username.exists", null, locale));
         }
         if (userForm.getPassword() == null || userForm.getPassword().trim().length() < 6) {
@@ -92,7 +94,7 @@ public class AdminUserController {
         }
         AppUser user = new AppUser();
         user.setFullName(userForm.getFullName().trim());
-        user.setUsername(userForm.getUsername().trim());
+        user.setUsername(username);
         user.setPasswordHash(passwordEncoder.encode(userForm.getPassword()));
         user.setRole(userForm.getRole());
         user.setActive(userForm.isActive());
@@ -125,7 +127,8 @@ public class AdminUserController {
                          Model model,
                          Locale locale) {
         AppUser user = userRepository.findById(id).orElseThrow();
-        if (userRepository.findByUsernameIgnoreCase(userForm.getUsername())
+        String username = normalizeUsername(userForm.getUsername());
+        if (username != null && userRepository.findByUsernameIgnoreCase(username)
             .filter(existing -> !existing.getId().equals(id)).isPresent()) {
             bindingResult.rejectValue("username", "username", messageSource.getMessage("validation.user.username.exists", null, locale));
         }
@@ -137,7 +140,7 @@ public class AdminUserController {
             return "admin/user-form";
         }
         user.setFullName(userForm.getFullName().trim());
-        user.setUsername(userForm.getUsername().trim());
+        user.setUsername(username);
         user.setRole(userForm.getRole());
         user.setActive(userForm.isActive());
         userRepository.save(user);
@@ -204,5 +207,9 @@ public class AdminUserController {
         model.addAttribute("users", userRepository.findAll().stream()
             .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
             .toList());
+    }
+
+    private String normalizeUsername(String username) {
+        return StringUtils.hasText(username) ? username.trim() : null;
     }
 }

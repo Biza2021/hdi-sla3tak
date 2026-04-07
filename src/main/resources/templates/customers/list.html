@@ -22,7 +22,7 @@
                             <div class="fw-semibold" th:text="${customer.fullName}">Name</div>
                             <div class="small text-secondary" th:text="${customer.phoneNumber}">Phone</div>
                             <div class="small text-secondary" th:if="${customer.secondaryPhoneNumber}" th:text="${customer.secondaryPhoneNumber}"></div>
-                            <div class="small text-secondary mt-2" th:text="#{customers.repairsCount(${#lists.size(customer.repairItems)})}">0 repairs</div>
+                            <div class="small text-secondary mt-2" th:text="#{customers.repairsCount(${repairCounts[customer.id]})}">0 repairs</div>
                         </div>
                         <a class="btn btn-sm btn-outline-dark rounded-pill" th:href="@{/customers/{id}(id=${customer.id})}" th:text="#{action.view}">View</a>
                     </div>

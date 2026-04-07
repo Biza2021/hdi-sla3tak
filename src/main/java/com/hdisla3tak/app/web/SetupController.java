@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.util.StringUtils;
 
 import java.util.Locale;
 
@@ -56,7 +57,8 @@ public class SetupController {
         if (!form.getPassword().equals(form.getConfirmPassword())) {
             bindingResult.rejectValue("confirmPassword", "confirmPassword", messageSource.getMessage("validation.setup.passwordsMismatch", null, locale));
         }
-        if (userRepository.existsByUsernameIgnoreCase(form.getUsername())) {
+        String username = normalizeUsername(form.getUsername());
+        if (username != null && userRepository.existsByUsernameIgnoreCase(username)) {
             bindingResult.rejectValue("username", "username", messageSource.getMessage("validation.user.username.exists", null, locale));
         }
         if (bindingResult.hasErrors()) {
@@ -65,7 +67,7 @@ public class SetupController {
 
         AppUser owner = new AppUser();
         owner.setFullName(form.getFullName().trim());
-        owner.setUsername(form.getUsername().trim());
+        owner.setUsername(username);
         owner.setPasswordHash(passwordEncoder.encode(form.getPassword()));
         owner.setRole(UserRole.ADMIN);
         owner.setActive(true);
@@ -74,5 +76,9 @@ public class SetupController {
 
         redirectAttributes.addFlashAttribute("successMessage", messageSource.getMessage("flash.setup.complete", null, locale));
         return "redirect:/login";
+    }
+
+    private String normalizeUsername(String username) {
+        return StringUtils.hasText(username) ? username.trim() : null;
     }
 }

@@ -27,9 +27,11 @@ public class CustomerController {
 
     @GetMapping
     public String list(@RequestParam(value = "q", required = false) String q, Model model) {
+        var customers = customerService.findAll(q);
         model.addAttribute("pageTitleKey", "customers.title");
         model.addAttribute("pageSubtitleKey", "customers.subtitle");
-        model.addAttribute("customers", customerService.findAll(q));
+        model.addAttribute("customers", customers);
+        model.addAttribute("repairCounts", customerService.getRepairCounts(customers));
         model.addAttribute("q", q == null ? "" : q);
         return "customers/list";
     }
@@ -68,7 +70,7 @@ public class CustomerController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        Customer customer = customerService.getById(id);
+        Customer customer = customerService.getDetailById(id);
         model.addAttribute("pageTitleKey", "customers.detail.title");
         model.addAttribute("pageSubtitleKey", "customers.detail.subtitle");
         model.addAttribute("customer", customer);

@@ -11,6 +11,7 @@ import com.hdisla3tak.app.repository.RepairItemRepository;
 import com.hdisla3tak.app.web.form.DeliveryForm;
 import com.hdisla3tak.app.web.form.RepairItemForm;
 import com.hdisla3tak.app.web.spec.RepairItemSpecifications;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -54,9 +55,7 @@ public class RepairItemService {
             RepairItemSpecifications.hasDelivered(delivered),
             RepairItemSpecifications.hasCategory(category)
         );
-        return repairItemRepository.findAll(specification).stream()
-            .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
-            .toList();
+        return repairItemRepository.findAll(specification, Sort.by(Sort.Direction.DESC, "updatedAt"));
     }
 
     public RepairItem getById(Long id) {

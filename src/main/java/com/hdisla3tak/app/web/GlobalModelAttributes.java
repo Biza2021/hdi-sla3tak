@@ -3,7 +3,6 @@ package com.hdisla3tak.app.web;
 import com.hdisla3tak.app.domain.enums.ItemCategory;
 import com.hdisla3tak.app.domain.enums.RepairStatus;
 import com.hdisla3tak.app.domain.enums.UserRole;
-import com.hdisla3tak.app.repository.AppUserRepository;
 import com.hdisla3tak.app.service.ShopSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
@@ -14,12 +13,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @ControllerAdvice(annotations = Controller.class)
 public class GlobalModelAttributes {
 
-    private final AppUserRepository userRepository;
     private final ShopSettingsService shopSettingsService;
 
-    public GlobalModelAttributes(AppUserRepository userRepository,
-                                 ShopSettingsService shopSettingsService) {
-        this.userRepository = userRepository;
+    public GlobalModelAttributes(ShopSettingsService shopSettingsService) {
         this.shopSettingsService = shopSettingsService;
     }
 
@@ -47,11 +43,6 @@ public class GlobalModelAttributes {
     @ModelAttribute("currentPath")
     public String currentPath(HttpServletRequest request) {
         return request.getRequestURI();
-    }
-
-    @ModelAttribute("setupRequired")
-    public boolean setupRequired() {
-        return userRepository.count() == 0;
     }
 
     @ModelAttribute("appDisplayName")

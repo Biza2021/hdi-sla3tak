@@ -6,7 +6,9 @@ import com.hdisla3tak.app.web.form.CustomerForm;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CustomerService {
@@ -19,15 +21,37 @@ public class CustomerService {
 
     public List<Customer> findAll(String q) {
         if (!StringUtils.hasText(q)) {
-            return customerRepository.findAll().stream()
-                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
-                .toList();
+            return customerRepository.findAllByOrderByCreatedAtDesc();
         }
         return customerRepository.findByFullNameContainingIgnoreCaseOrPhoneNumberContainingIgnoreCaseOrderByCreatedAtDesc(q, q);
     }
 
     public Customer getById(Long id) {
         return customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+    }
+
+    public Customer getDetailById(Long id) {
+        return customerRepository.findDetailById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+    }
+
+    public Map<Long, Long> getRepairCounts(List<Customer> customers) {
+        if (customers.isEmpty()) {
+            return Map.of();
+        }
+
+        List<Long> customerIds = customers.stream()
+            .map(Customer::getId)
+            .toList();
+
+        Map<Long, Long> repairCounts = new LinkedHashMap<>();
+        for (Long customerId : customerIds) {
+            repairCounts.put(customerId, 0L);
+        }
+
+        customerRepository.countRepairsByCustomerIds(customerIds)
+            .forEach(count -> repairCounts.put(count.getCustomerId(), count.getRepairCount()));
+
+        return repairCounts;
     }
 
     public Customer create(CustomerForm form) {

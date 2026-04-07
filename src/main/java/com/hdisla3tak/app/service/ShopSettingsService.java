@@ -12,6 +12,7 @@ public class ShopSettingsService {
     public static final String DEFAULT_BUSINESS_NAME = "Hdi Sla3tak";
 
     private final ShopSettingsRepository shopSettingsRepository;
+    private volatile String cachedBusinessName;
 
     public ShopSettingsService(ShopSettingsRepository shopSettingsRepository) {
         this.shopSettingsRepository = shopSettingsRepository;
@@ -19,27 +20,32 @@ public class ShopSettingsService {
 
     @Transactional(readOnly = true)
     public String getBusinessName() {
-        return shopSettingsRepository.findTopByOrderByIdAsc()
+        String cached = cachedBusinessName;
+        if (cached != null) {
+            return cached;
+        }
+
+        String resolvedBusinessName = shopSettingsRepository.findTopByOrderByIdAsc()
             .map(ShopSettings::getBusinessName)
             .filter(StringUtils::hasText)
             .map(String::trim)
             .orElse(DEFAULT_BUSINESS_NAME);
+        cachedBusinessName = resolvedBusinessName;
+        return resolvedBusinessName;
     }
 
     @Transactional(readOnly = true)
     public String getEditableBusinessName() {
-        return shopSettingsRepository.findTopByOrderByIdAsc()
-            .map(ShopSettings::getBusinessName)
-            .filter(StringUtils::hasText)
-            .map(String::trim)
-            .orElse(DEFAULT_BUSINESS_NAME);
+        return getBusinessName();
     }
 
     @Transactional
     public void saveBusinessName(String businessName) {
         ShopSettings settings = shopSettingsRepository.findTopByOrderByIdAsc()
             .orElseGet(ShopSettings::new);
-        settings.setBusinessName(businessName.trim());
+        String trimmedBusinessName = businessName.trim();
+        settings.setBusinessName(trimmedBusinessName);
         shopSettingsRepository.save(settings);
+        cachedBusinessName = trimmedBusinessName;
     }
 }
