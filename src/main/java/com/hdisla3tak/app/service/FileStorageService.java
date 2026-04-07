@@ -114,6 +114,11 @@ public class FileStorageService {
         if (ensureWritableDirectory(configuredRoot)) {
             return new UploadRootSelection(configuredRoot, false);
         }
+        Path mountedParentRoot = configuredRoot.getParent();
+        if (mountedParentRoot != null && ensureWritableDirectory(mountedParentRoot)) {
+            log.warn("Using mounted parent upload directory {} because configured directory {} is not writable.", mountedParentRoot, configuredRoot);
+            return new UploadRootSelection(mountedParentRoot, false);
+        }
         if (ensureWritableDirectory(FALLBACK_UPLOAD_ROOT)) {
             log.warn("Using fallback upload directory {} because configured directory {} is not writable.", FALLBACK_UPLOAD_ROOT, configuredRoot);
             return new UploadRootSelection(FALLBACK_UPLOAD_ROOT, true);
