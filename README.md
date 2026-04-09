@@ -2,6 +2,12 @@
 
 Mobile-first Spring Boot web app for repair shops in Morocco. It helps technicians register customer items, attach proof photos, generate pickup codes, update repair status, verify ownership, and confirm delivery.
 
+## Deployment model
+- This app is designed for one repair shop per deployment.
+- Each shop should get its own app instance, its own database, its own uploads volume, its own users, and its own shop name.
+- The repo does not ship a default admin account or seeded customer/shop data.
+- On a fresh database, `/login` redirects to `/setup`, where the first owner account and shop name are created.
+
 ## Main features
 - Mobile-first frontend inspired by the approved Stitch direction
 - Spring Boot MVC + Thymeleaf frontend and backend in one project
@@ -22,6 +28,12 @@ Mobile-first Spring Boot web app for repair shops in Morocco. It helps technicia
 - Thymeleaf
 - H2 by default
 - PostgreSQL-ready profile still included in the project
+
+## What already makes single-shop deployments safe
+- `app_users` is local to each deployment's database and the first owner is created only through the setup flow.
+- `shop_settings` stores one shop-wide business name per deployment.
+- Customer, repair item, history, and upload data all live inside that deployment's own database and volume.
+- `data/`, `uploads/`, and `target/` are gitignored, so shop data is not meant to live in the repo.
 
 ## Run in IntelliJ
 1. Open the project root that contains `pom.xml`.
@@ -70,6 +82,38 @@ The included `docker-compose.yml` already mounts persistent storage for:
 - the H2 database files at `/app/data`
 - uploaded item photos at `/app/uploads`
 
+## Railway per-shop deployment
+Use this repo as the reusable template, and create one new Railway project per shop.
+
+### Recommended repeatable workflow
+1. Create a brand-new Railway project from this GitHub repo for each shop.
+2. Attach one fresh volume for uploads and mount it at `/app/uploads`.
+3. Provision one fresh PostgreSQL database for that same shop only, or connect one external PostgreSQL database dedicated to that shop.
+4. Set the environment variables from `.env.example`.
+5. Open the app after the first deploy and complete `/setup` to create the owner account and shop name.
+6. Never point two shop deployments at the same database or the same volume.
+
+### Minimum Railway variables
+```text
+SPRING_PROFILES_ACTIVE=postgres
+DB_HOST=<shop-specific-db-host>
+DB_PORT=5432
+DB_NAME=<shop-specific-db-name>
+DB_USERNAME=<shop-specific-db-user>
+DB_PASSWORD=<shop-specific-db-password>
+APP_STORAGE_UPLOAD_DIR=/app/uploads/items
+APP_SMS_BASE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
+```
+
+### Railway config included in this repo
+- `railway.json` sets Dockerfile builds, a stable `/healthz` deployment healthcheck, and a conservative restart policy.
+- The health endpoint is public and returns HTTP 200 without depending on whether the shop has finished owner setup yet.
+
+### Best template strategy for Railway
+- Safest: keep one clean GitHub repo as the golden template and create a new Railway project from it for each shop.
+- Avoid duplicating an already-live shop environment, because that can copy service wiring or secrets you did not intend to reuse.
+- Pick a Railway region close to the shop's database region to reduce request latency.
+
 ## Default database
 The app uses a file-based H2 database by default:
 - path: `./data/hdisla3takdb`
@@ -95,3 +139,4 @@ When the item moves to **Ready for pickup**, the app prepares another SMS compos
 ## Notes
 - The message content is bilingual-friendly and can be refined later.
 - The app is designed as a strong version 1 foundation and can later be extended with QR codes, billing, advanced analytics, or a separate frontend.
+- For production-style deployments, PostgreSQL + a dedicated uploads volume is the intended setup.

@@ -22,8 +22,8 @@
                     <li th:text="#{dashboard.step5}">Use phone + photo + pickup code when delivering.</li>
                 </ol>
                 <div class="d-grid gap-2 d-md-flex">
-                    <a class="btn btn-primary rounded-pill" th:href="@{/customers/new}" th:text="#{dashboard.addCustomer}">Add customer</a>
-                    <a class="btn btn-dark rounded-pill" th:href="@{/items/new}" th:text="#{dashboard.addRepair}">Register repair item</a>
+                    <a class="btn btn-primary rounded-pill" th:href="@{/{shopSlug}/customers/new(shopSlug=${currentShopSlug})}" th:text="#{dashboard.addCustomer}">Add customer</a>
+                    <a class="btn btn-dark rounded-pill" th:href="@{/{shopSlug}/items/new(shopSlug=${currentShopSlug})}" th:text="#{dashboard.addRepair}">Register repair item</a>
                 </div>
             </div>
         </div>
@@ -31,15 +31,15 @@
             <div class="card-surface p-4 h-100">
                 <h3 class="section-title" th:text="#{dashboard.quickChecks}">Quick checks</h3>
                 <div class="stacked-action-list">
-                    <a class="history-link" th:href="@{/items/delivery}">
+                    <a class="history-link" th:href="@{/{shopSlug}/items/delivery(shopSlug=${currentShopSlug})}">
                         <div class="fw-semibold" th:text="#{dashboard.deliveryVerify}">Verify delivery</div>
                         <div class="small text-secondary" th:text="#{dashboard.deliveryVerifyHint}">Use phone, photo, and pickup code before handover.</div>
                     </a>
-                    <a class="history-link" th:href="@{/items(status='READY_FOR_PICKUP')}">
+                    <a class="history-link" th:href="@{/{shopSlug}/items(shopSlug=${currentShopSlug},status='READY_FOR_PICKUP')}">
                         <div class="fw-semibold" th:text="#{dashboard.readyItems}">Ready for pickup</div>
                         <div class="small text-secondary" th:text="#{dashboard.readyItemsHint}">Open items already waiting for customer pickup.</div>
                     </a>
-                    <a class="history-link" th:href="@{/items(delivered='false')}">
+                    <a class="history-link" th:href="@{/{shopSlug}/items(shopSlug=${currentShopSlug},delivered='false')}">
                         <div class="fw-semibold" th:text="#{dashboard.activeJobs}">Open jobs</div>
                         <div class="small text-secondary" th:text="#{dashboard.activeJobsHint}">See everything still inside the workshop.</div>
                     </a>

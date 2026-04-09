@@ -19,15 +19,15 @@
             <div class="col-12" th:each="item : ${results}">
                 <div class="app-card p-3">
                     <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center">
-                        <img class="item-thumb" th:src="${item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="item">
+                        <img class="item-thumb" th:src="${item.imagePath != null} ? @{/{shopSlug}/items/{id}/image(shopSlug=${currentShopSlug},id=${item.id})} : @{/img/placeholder-item.svg}" alt="item">
                         <div class="flex-grow-1">
                             <div class="fw-semibold" th:text="${item.title}"></div>
                             <div class="small text-secondary" th:text="${item.customer.fullName + ' - ' + item.customer.phoneNumber}"></div>
                             <div class="small text-secondary" th:text="|#{items.pickupCode}: ${item.pickupCode} - ${@labels.status(item.status)}|"></div>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
-                            <a class="btn btn-outline-dark rounded-pill" th:href="@{/items/{id}(id=${item.id})}" th:text="#{action.view}">View</a>
-                            <a class="btn btn-primary rounded-pill" th:if="${!item.delivered}" th:href="@{/items/{id}/deliver(id=${item.id})}" th:text="#{delivery.confirmDelivery}">Confirm delivery</a>
+                            <a class="btn btn-outline-dark rounded-pill" th:href="@{/{shopSlug}/items/{id}(shopSlug=${currentShopSlug},id=${item.id})}" th:text="#{action.view}">View</a>
+                            <a class="btn btn-primary rounded-pill" th:if="${!item.delivered}" th:href="@{/{shopSlug}/items/{id}/deliver(shopSlug=${currentShopSlug},id=${item.id})}" th:text="#{delivery.confirmDelivery}">Confirm delivery</a>
                         </div>
                     </div>
                 </div>

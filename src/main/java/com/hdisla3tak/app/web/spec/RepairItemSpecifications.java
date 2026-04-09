@@ -2,6 +2,7 @@ package com.hdisla3tak.app.web.spec;
 
 import com.hdisla3tak.app.domain.Customer;
 import com.hdisla3tak.app.domain.RepairItem;
+import com.hdisla3tak.app.domain.Shop;
 import com.hdisla3tak.app.domain.enums.ItemCategory;
 import com.hdisla3tak.app.domain.enums.RepairStatus;
 import jakarta.persistence.criteria.Join;
@@ -26,6 +27,10 @@ public class RepairItemSpecifications {
                 cb.like(cb.lower(customerJoin.get("phoneNumber")), like)
             );
         };
+    }
+
+    public static Specification<RepairItem> belongsToShop(Long shopId) {
+        return (root, query, cb) -> shopId == null ? null : cb.equal(root.get("shop").get("id"), shopId);
     }
 
     public static Specification<RepairItem> hasStatus(RepairStatus status) {

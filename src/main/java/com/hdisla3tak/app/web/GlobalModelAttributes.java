@@ -4,6 +4,7 @@ import com.hdisla3tak.app.domain.enums.ItemCategory;
 import com.hdisla3tak.app.domain.enums.RepairStatus;
 import com.hdisla3tak.app.domain.enums.UserRole;
 import com.hdisla3tak.app.service.ShopSettingsService;
+import com.hdisla3tak.app.tenant.ShopContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -14,9 +15,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalModelAttributes {
 
     private final ShopSettingsService shopSettingsService;
+    private final ShopContext shopContext;
 
-    public GlobalModelAttributes(ShopSettingsService shopSettingsService) {
+    public GlobalModelAttributes(ShopSettingsService shopSettingsService,
+                                 ShopContext shopContext) {
         this.shopSettingsService = shopSettingsService;
+        this.shopContext = shopContext;
     }
 
     @ModelAttribute("repairStatuses")
@@ -43,6 +47,11 @@ public class GlobalModelAttributes {
     @ModelAttribute("currentPath")
     public String currentPath(HttpServletRequest request) {
         return request.getRequestURI();
+    }
+
+    @ModelAttribute("currentShopSlug")
+    public String currentShopSlug() {
+        return shopContext.getCurrentShopSlug().orElse(null);
     }
 
     @ModelAttribute("appDisplayName")

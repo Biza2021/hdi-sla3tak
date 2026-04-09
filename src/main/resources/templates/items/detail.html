@@ -4,7 +4,7 @@
     <div class="row g-3 g-lg-4">
         <div class="col-lg-5">
             <div class="card-surface p-4 h-100">
-                <img class="detail-image mb-3" th:src="${item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="item">
+                <img class="detail-image mb-3" th:src="${item.imagePath != null} ? @{/{shopSlug}/items/{id}/image(shopSlug=${currentShopSlug},id=${item.id})} : @{/img/placeholder-item.svg}" alt="item">
                 <div class="detail-row"><span th:text="#{items.customer}">Customer</span><strong th:text="${item.customer.fullName}"></strong></div>
                 <div class="detail-row"><span th:text="#{customers.phone}">Phone</span><strong th:text="${item.customer.phoneNumber}"></strong></div>
                 <div class="detail-row"><span th:text="#{items.pickupCode}">Pickup code</span><strong th:text="${item.pickupCode}"></strong></div>
@@ -19,9 +19,9 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap mt-3">
-                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/items/{id}/edit(id=${item.id})}" th:text="#{action.edit}">Edit</a>
-                    <a class="btn btn-primary rounded-pill" th:if="${!item.delivered}" th:href="@{/items/{id}/deliver(id=${item.id})}" th:text="#{items.markDelivered}">Deliver item</a>
-                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/items/{id}/receipt(id=${item.id})}" th:text="#{items.printReceipt}">Print receipt</a>
+                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/{shopSlug}/items/{id}/edit(shopSlug=${currentShopSlug},id=${item.id})}" th:text="#{action.edit}">Edit</a>
+                    <a class="btn btn-primary rounded-pill" th:if="${!item.delivered}" th:href="@{/{shopSlug}/items/{id}/deliver(shopSlug=${currentShopSlug},id=${item.id})}" th:text="#{items.markDelivered}">Deliver item</a>
+                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/{shopSlug}/items/{id}/receipt(shopSlug=${currentShopSlug},id=${item.id})}" th:text="#{items.printReceipt}">Print receipt</a>
                 </div>
             </div>
         </div>

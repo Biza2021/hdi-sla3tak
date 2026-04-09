@@ -10,8 +10,8 @@
                 <div class="detail-row" th:if="${customer.secondaryPhoneNumber}"><span th:text="#{customers.secondaryPhone}">Secondary</span><strong th:text="${customer.secondaryPhoneNumber}"></strong></div>
                 <div class="detail-row"><span th:text="#{customers.createdAt}">Created</span><strong th:text="${#temporals.format(customer.createdAt, 'yyyy-MM-dd HH:mm')}"></strong></div>
                 <div class="mt-3 d-flex gap-2 flex-wrap">
-                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/customers/{id}/edit(id=${customer.id})}" th:text="#{action.edit}">Edit</a>
-                    <a class="btn btn-primary rounded-pill" th:href="@{/items/new(customerId=${customer.id})}" th:text="#{customers.newRepair}">New repair</a>
+                    <a class="btn btn-outline-dark rounded-pill" th:href="@{/{shopSlug}/customers/{id}/edit(shopSlug=${currentShopSlug},id=${customer.id})}" th:text="#{action.edit}">Edit</a>
+                    <a class="btn btn-primary rounded-pill" th:href="@{/{shopSlug}/items/new(shopSlug=${currentShopSlug},customerId=${customer.id})}" th:text="#{customers.newRepair}">New repair</a>
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
                     <span class="small text-secondary" th:text="#{customers.repairsCount(${#lists.size(customer.repairItems)})}">0 repairs</span>
                 </div>
                 <div class="vstack gap-3" th:if="${!#lists.isEmpty(customer.repairItems)}">
-                    <a class="history-link" th:each="item : ${customer.repairItems}" th:href="@{/items/{id}(id=${item.id})}">
+                    <a class="history-link" th:each="item : ${customer.repairItems}" th:href="@{/{shopSlug}/items/{id}(shopSlug=${currentShopSlug},id=${item.id})}">
                         <div class="d-flex justify-content-between gap-3 align-items-start">
                             <div>
                                 <div class="fw-semibold" th:text="${item.title}">Item title</div>

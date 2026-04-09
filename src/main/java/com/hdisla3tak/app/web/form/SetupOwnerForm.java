@@ -9,6 +9,10 @@ public class SetupOwnerForm {
     @Size(max = 160, message = "{validation.settings.businessName.size}")
     private String businessName;
 
+    @NotBlank(message = "{validation.shop.slug.required}")
+    @Size(max = 120, message = "{validation.shop.slug.size}")
+    private String shopSlug;
+
     @NotBlank(message = "{validation.user.fullName.required}")
     @Size(max = 120, message = "{validation.user.fullName.size}")
     private String fullName;
@@ -26,6 +30,8 @@ public class SetupOwnerForm {
 
     public String getBusinessName() { return businessName; }
     public void setBusinessName(String businessName) { this.businessName = businessName; }
+    public String getShopSlug() { return shopSlug; }
+    public void setShopSlug(String shopSlug) { this.shopSlug = shopSlug; }
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public String getUsername() { return username; }

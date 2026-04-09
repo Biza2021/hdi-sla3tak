@@ -4,18 +4,22 @@ import com.hdisla3tak.app.config.AppProperties;
 import com.hdisla3tak.app.domain.Customer;
 import com.hdisla3tak.app.domain.RepairItem;
 import com.hdisla3tak.app.domain.RepairItemHistory;
+import com.hdisla3tak.app.domain.Shop;
 import com.hdisla3tak.app.domain.enums.RepairStatus;
 import com.hdisla3tak.app.repository.CustomerRepository;
 import com.hdisla3tak.app.repository.RepairItemHistoryRepository;
 import com.hdisla3tak.app.repository.RepairItemRepository;
+import com.hdisla3tak.app.tenant.ShopContext;
 import com.hdisla3tak.app.web.form.DeliveryForm;
 import com.hdisla3tak.app.web.form.RepairItemForm;
 import com.hdisla3tak.app.web.spec.RepairItemSpecifications;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -34,22 +38,27 @@ public class RepairItemService {
     private final CustomerRepository customerRepository;
     private final FileStorageService fileStorageService;
     private final AppProperties appProperties;
+    private final ShopContext shopContext;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public RepairItemService(RepairItemRepository repairItemRepository,
                              RepairItemHistoryRepository historyRepository,
                              CustomerRepository customerRepository,
                              FileStorageService fileStorageService,
-                             AppProperties appProperties) {
+                             AppProperties appProperties,
+                             ShopContext shopContext) {
         this.repairItemRepository = repairItemRepository;
         this.historyRepository = historyRepository;
         this.customerRepository = customerRepository;
         this.fileStorageService = fileStorageService;
         this.appProperties = appProperties;
+        this.shopContext = shopContext;
     }
 
     public List<RepairItem> findAll(String q, RepairStatus status, String delivered, String category) {
+        Long shopId = currentShop().getId();
         Specification<RepairItem> specification = Specification.allOf(
+            RepairItemSpecifications.belongsToShop(shopId),
             RepairItemSpecifications.matchesSearch(q),
             RepairItemSpecifications.hasStatus(status),
             RepairItemSpecifications.hasDelivered(delivered),
@@ -59,8 +68,8 @@ public class RepairItemService {
     }
 
     public RepairItem getById(Long id) {
-        RepairItem item = repairItemRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Repair item not found."));
+        RepairItem item = repairItemRepository.findByIdAndShop_Id(id, currentShop().getId())
+            .orElseThrow(() -> notFound());
         return ensurePublicTrackingToken(item);
     }
 
@@ -128,13 +137,15 @@ public class RepairItemService {
         if (!StringUtils.hasText(q)) {
             return List.of();
         }
-        return repairItemRepository.searchForDelivery(q.trim());
+        return repairItemRepository.searchForDeliveryByShopId(currentShop().getId(), q.trim());
     }
 
     private void apply(RepairItem item, RepairItemForm form, MultipartFile image, boolean creating) {
-        Customer customer = customerRepository.findById(form.getCustomerId())
+        Shop currentShop = currentShop();
+        Customer customer = customerRepository.findByIdAndShop_Id(form.getCustomerId(), currentShop.getId())
             .orElseThrow(() -> new IllegalArgumentException("Selected customer does not exist."));
         item.setCustomer(customer);
+        item.setShop(customer.getShop() != null ? customer.getShop() : currentShop);
         item.setCategory(form.getCategory());
         item.setTitle(form.getTitle().trim());
         item.setDescription(trimToNull(form.getDescription()));
@@ -152,7 +163,7 @@ public class RepairItemService {
         }
 
         if (image != null && !image.isEmpty()) {
-            item.setImagePath(fileStorageService.storeImage(image));
+            item.setImagePath(fileStorageService.storeImage(image, item.getShop()));
         }
     }
 
@@ -167,9 +178,10 @@ public class RepairItemService {
 
     private String generatePickupCode() {
         String code;
+        Long shopId = currentShop().getId();
         do {
             code = "HS-" + (100000 + secureRandom.nextInt(900000));
-        } while (repairItemRepository.existsByPickupCode(code));
+        } while (repairItemRepository.existsByPickupCodeAndShop_Id(code, shopId));
         return code;
     }
 
@@ -194,6 +206,7 @@ public class RepairItemService {
     private void log(RepairItem item, String action, String message, String actor) {
         RepairItemHistory history = new RepairItemHistory();
         history.setRepairItem(item);
+        history.setShop(item.getShop());
         history.setActionType(action);
         history.setMessage(message);
         history.setActorName(actor);
@@ -220,5 +233,13 @@ public class RepairItemService {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private Shop currentShop() {
+        return shopContext.requireCurrentShop();
+    }
+
+    private ResponseStatusException notFound() {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Repair item not found.");
     }
 }
