@@ -1,5 +1,7 @@
 package com.hdisla3tak.app.service;
 
+import com.hdisla3tak.app.domain.AppUser;
+import com.hdisla3tak.app.domain.Shop;
 import com.hdisla3tak.app.repository.AppUserRepository;
 import com.hdisla3tak.app.security.AuthenticatedShopUser;
 import com.hdisla3tak.app.security.ShopUserPrincipal;
@@ -28,15 +30,19 @@ public class AppUserDetailsService {
     }
 
     public ShopUserPrincipal toPrincipal(AuthenticatedShopUser user) {
-        return new ShopUserPrincipal(
-            user.userId(),
-            user.shopId(),
-            user.shopSlug(),
-            user.fullName(),
-            user.username(),
-            user.passwordHash(),
-            user.active(),
-            user.role().name()
-        );
+        Shop shop = new Shop();
+        shop.setId(user.shopId());
+        shop.setSlug(user.shopSlug());
+
+        AppUser appUser = new AppUser();
+        appUser.setId(user.userId());
+        appUser.setShop(shop);
+        appUser.setFullName(user.fullName());
+        appUser.setUsername(user.username());
+        appUser.setPasswordHash(user.passwordHash());
+        appUser.setActive(user.active());
+        appUser.setRole(user.role());
+
+        return new ShopUserPrincipal(appUser);
     }
 }
