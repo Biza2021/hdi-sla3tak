@@ -33,7 +33,7 @@ public class SecurityConfig {
                                                    LogoutSuccessHandler logoutSuccessHandler) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/img/**", "/login", "/setup", "/setup/**", "/shops/**", "/track/**", "/healthz", "/error/**", "/h2-console/**", "/*/login").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico", "/login", "/setup", "/setup/**", "/shops/**", "/track/**", "/healthz", "/error/**", "/h2-console/**", "/*/login").permitAll()
                 .requestMatchers("/*/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
@@ -55,7 +55,7 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers("/shops/**");
+        return web -> web.ignoring().requestMatchers("/shops/**", "/favicon.ico");
     }
 
     @Bean
