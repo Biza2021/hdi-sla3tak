@@ -1,8 +1,8 @@
 package com.hdisla3tak.app.service;
 
-import com.hdisla3tak.app.domain.AppUser;
-import com.hdisla3tak.app.security.ShopUserPrincipal;
 import com.hdisla3tak.app.repository.AppUserRepository;
+import com.hdisla3tak.app.security.AuthenticatedShopUser;
+import com.hdisla3tak.app.security.ShopUserPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,11 +23,20 @@ public class AppUserDetailsService {
         if (!StringUtils.hasText(username) || !StringUtils.hasText(shopSlug)) {
             return Optional.empty();
         }
-        return userRepository.findByUsernameIgnoreCaseAndShop_SlugIgnoreCase(username.trim(), shopSlug.trim())
+        return userRepository.findAuthenticatedUserByUsernameAndShopSlug(username.trim(), shopSlug.trim())
             .map(this::toPrincipal);
     }
 
-    public ShopUserPrincipal toPrincipal(AppUser user) {
-        return new ShopUserPrincipal(user);
+    public ShopUserPrincipal toPrincipal(AuthenticatedShopUser user) {
+        return new ShopUserPrincipal(
+            user.userId(),
+            user.shopId(),
+            user.shopSlug(),
+            user.fullName(),
+            user.username(),
+            user.passwordHash(),
+            user.active(),
+            user.role().name()
+        );
     }
 }
