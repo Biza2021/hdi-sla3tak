@@ -24,6 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(shopContextInterceptor)
-            .addPathPatterns("/*", "/*/login", "/*/admin/**", "/*/customers/**", "/*/items/**");
+            .addPathPatterns("/*", "/*/login", "/*/admin/**", "/*/customers/**", "/*/items/**")
+            .excludePathPatterns("/shops/**", "/setup", "/setup/**", "/login", "/track/**", "/healthz", "/error/**", "/css/**", "/js/**", "/img/**", "/h2-console/**");
     }
 }
