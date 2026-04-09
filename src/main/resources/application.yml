@@ -29,6 +29,7 @@ spring:
       path: /h2-console
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: framework
   error:
     whitelabel:
       enabled: false
