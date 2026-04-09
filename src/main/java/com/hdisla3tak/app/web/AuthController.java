@@ -37,7 +37,7 @@ public class AuthController {
             return "redirect:/shops/new";
         }
         if (isAuthenticated(authentication) && authentication.getPrincipal() instanceof ShopUserPrincipal principal) {
-            return "redirect:/" + principal.getShopSlug();
+            return "redirect:/" + principal.getShopSlug() + "/dashboard";
         }
         return shopService.findSingleShop()
             .map(shop -> "redirect:/" + shop.getSlug() + "/login" + buildLoginQuery(error, logout))
@@ -55,7 +55,7 @@ public class AuthController {
             return "redirect:/shops/new";
         }
         if (isAuthenticated(authentication) && authentication.getPrincipal() instanceof ShopUserPrincipal principal) {
-            return "redirect:/" + principal.getShopSlug();
+            return "redirect:/" + principal.getShopSlug() + "/dashboard";
         }
         if (Boolean.TRUE.equals(error)) {
             model.addAttribute("errorMessage", messageSource.getMessage("flash.auth.invalidLogin", null, locale));

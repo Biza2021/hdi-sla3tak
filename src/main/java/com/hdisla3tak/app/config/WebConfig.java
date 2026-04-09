@@ -19,11 +19,13 @@ public class WebConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/error/404").setViewName("error/404");
         registry.addViewController("/error/500").setViewName("error/500");
+        registry.addViewController("/favicon.ico").setViewName("forward:/img/logo.png");
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(shopContextInterceptor)
-            .addPathPatterns("/*", "/*/login", "/*/admin/**", "/*/customers/**", "/*/items/**");
+            .addPathPatterns("/*", "/*/dashboard", "/*/login", "/*/admin/**", "/*/customers/**", "/*/items/**")
+            .excludePathPatterns("/shops/**", "/setup", "/setup/**", "/login", "/track/**", "/healthz", "/error/**", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/h2-console/**");
     }
 }

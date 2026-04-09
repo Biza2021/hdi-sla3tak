@@ -28,15 +28,18 @@ public class DashboardController {
 
     @GetMapping("/")
     public String root(Authentication authentication) {
+        if (!shopService.hasAnyShops()) {
+            return "redirect:/shops/new";
+        }
         if (isAuthenticated(authentication) && authentication.getPrincipal() instanceof ShopUserPrincipal principal) {
-            return "redirect:/" + principal.getShopSlug();
+            return "redirect:/" + principal.getShopSlug() + "/dashboard";
         }
         return shopService.findSingleShop()
             .map(shop -> "redirect:/" + shop.getSlug() + "/login")
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/{shopSlug}")
+    @GetMapping({"/{shopSlug}", "/{shopSlug}/dashboard"})
     public String dashboard(@PathVariable String shopSlug, Model model, Locale locale) {
         model.addAttribute("pageTitleKey", "dashboard.title");
         model.addAttribute("pageSubtitleKey", "dashboard.subtitle");

@@ -29,6 +29,9 @@ spring:
       path: /h2-console
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: framework
+  tomcat:
+    use-relative-redirects: true
   error:
     whitelabel:
       enabled: false

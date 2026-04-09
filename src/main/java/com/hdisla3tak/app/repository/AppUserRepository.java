@@ -3,6 +3,7 @@ package com.hdisla3tak.app.repository;
 import com.hdisla3tak.app.domain.AppUser;
 import com.hdisla3tak.app.domain.Shop;
 import com.hdisla3tak.app.domain.enums.UserRole;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +15,10 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUsernameIgnoreCase(String username);
     boolean existsByUsernameIgnoreCase(String username);
+
+    @EntityGraph(attributePaths = "shop")
     Optional<AppUser> findByUsernameIgnoreCaseAndShop_SlugIgnoreCase(String username, String shopSlug);
+
     Optional<AppUser> findByUsernameIgnoreCaseAndShop_Id(String username, Long shopId);
     boolean existsByUsernameIgnoreCaseAndShop_Id(String username, Long shopId);
     Optional<AppUser> findByIdAndShop_Id(Long id, Long shopId);
