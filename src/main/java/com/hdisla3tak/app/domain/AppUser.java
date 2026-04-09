@@ -2,6 +2,7 @@ package com.hdisla3tak.app.domain;
 
 import com.hdisla3tak.app.domain.enums.UserRole;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -16,8 +17,13 @@ public class AppUser {
     @Column(nullable = false, length = 120)
     private String fullName;
 
-    @Column(nullable = false, unique = true, length = 60)
+    @Column(nullable = false, length = 60)
     private String username;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    @NotNull
+    private Shop shop;
 
     @Column(nullable = false)
     private String passwordHash;
@@ -43,6 +49,8 @@ public class AppUser {
     public void setFullName(String fullName) { this.fullName = fullName; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+    public Shop getShop() { return shop; }
+    public void setShop(Shop shop) { this.shop = shop; }
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public UserRole getRole() { return role; }

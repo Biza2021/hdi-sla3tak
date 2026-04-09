@@ -2,9 +2,12 @@ package com.hdisla3tak.app.service;
 
 import com.hdisla3tak.app.domain.Customer;
 import com.hdisla3tak.app.repository.CustomerRepository;
+import com.hdisla3tak.app.tenant.ShopContext;
 import com.hdisla3tak.app.web.form.CustomerForm;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,24 +17,34 @@ import java.util.Map;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final ShopContext shopContext;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository,
+                           ShopContext shopContext) {
         this.customerRepository = customerRepository;
+        this.shopContext = shopContext;
     }
 
     public List<Customer> findAll(String q) {
+        Long shopId = currentShopId();
         if (!StringUtils.hasText(q)) {
-            return customerRepository.findAllByOrderByCreatedAtDesc();
+            return customerRepository.findAllByShop_IdOrderByCreatedAtDesc(shopId);
         }
-        return customerRepository.findByFullNameContainingIgnoreCaseOrPhoneNumberContainingIgnoreCaseOrderByCreatedAtDesc(q, q);
+        return customerRepository.searchByShopId(shopId, q.trim());
+    }
+
+    public List<Customer> findAllForSelection() {
+        return customerRepository.findAllForSelectionByShopId(currentShopId());
     }
 
     public Customer getById(Long id) {
-        return customerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+        return customerRepository.findByIdAndShop_Id(id, currentShopId())
+            .orElseThrow(() -> notFound());
     }
 
     public Customer getDetailById(Long id) {
-        return customerRepository.findDetailById(id).orElseThrow(() -> new IllegalArgumentException("Customer not found."));
+        return customerRepository.findDetailByIdAndShopId(id, currentShopId())
+            .orElseThrow(() -> notFound());
     }
 
     public Map<Long, Long> getRepairCounts(List<Customer> customers) {
@@ -48,7 +61,7 @@ public class CustomerService {
             repairCounts.put(customerId, 0L);
         }
 
-        customerRepository.countRepairsByCustomerIds(customerIds)
+        customerRepository.countRepairsByShopIdAndCustomerIds(currentShopId(), customerIds)
             .forEach(count -> repairCounts.put(count.getCustomerId(), count.getRepairCount()));
 
         return repairCounts;
@@ -77,6 +90,7 @@ public class CustomerService {
     }
 
     private void apply(Customer customer, CustomerForm form) {
+        customer.setShop(shopContext.requireCurrentShop());
         customer.setFullName(form.getFullName().trim());
         customer.setPhoneNumber(form.getPhoneNumber().trim());
         customer.setSecondaryPhoneNumber(trimToNull(form.getSecondaryPhoneNumber()));
@@ -90,7 +104,7 @@ public class CustomerService {
     }
 
     private boolean hasDuplicatePrimaryPhone(String normalizedPhone, Long currentCustomerId) {
-        return customerRepository.findAll().stream()
+        return customerRepository.findAllByShop_Id(currentShopId()).stream()
             .filter(customer -> currentCustomerId == null || !customer.getId().equals(currentCustomerId))
             .map(Customer::getPhoneNumber)
             .map(this::normalizePhone)
@@ -103,5 +117,13 @@ public class CustomerService {
 
     private String trimToNull(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private Long currentShopId() {
+        return shopContext.requireCurrentShop().getId();
+    }
+
+    private ResponseStatusException notFound() {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found.");
     }
 }

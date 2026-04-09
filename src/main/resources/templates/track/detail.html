@@ -21,7 +21,7 @@
 
         <div class="row g-4">
             <div class="col-12 col-lg-5">
-                <img class="detail-image" th:src="${item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="item">
+                <img class="detail-image" th:src="${item.imagePath != null} ? @{/track/{token}/image(token=${item.publicTrackingToken})} : @{/img/placeholder-item.svg}" alt="item">
             </div>
             <div class="col-12 col-lg-7">
                 <div class="detail-row"><span th:text="#{items.itemTitle}">Item title</span><strong th:text="${item.title}"></strong></div>

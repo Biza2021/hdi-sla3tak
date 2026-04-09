@@ -1,19 +1,15 @@
 package com.hdisla3tak.app.service;
 
 import com.hdisla3tak.app.domain.AppUser;
+import com.hdisla3tak.app.security.ShopUserPrincipal;
 import com.hdisla3tak.app.repository.AppUserRepository;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
-public class AppUserDetailsService implements UserDetailsService {
+public class AppUserDetailsService {
 
     private final AppUserRepository userRepository;
 
@@ -21,17 +17,15 @@ public class AppUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser user = userRepository.findByUsernameIgnoreCase(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public Optional<ShopUserPrincipal> loadUserByUsernameAndShopSlug(String username, String shopSlug) {
+        if (!StringUtils.hasText(username) || !StringUtils.hasText(shopSlug)) {
+            return Optional.empty();
+        }
+        return userRepository.findByUsernameIgnoreCaseAndShop_SlugIgnoreCase(username.trim(), shopSlug.trim())
+            .map(this::toPrincipal);
+    }
 
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-
-        return User.withUsername(user.getUsername())
-            .password(user.getPasswordHash())
-            .authorities(authorities)
-            .disabled(!user.isActive())
-            .build();
+    public ShopUserPrincipal toPrincipal(AppUser user) {
+        return new ShopUserPrincipal(user);
     }
 }

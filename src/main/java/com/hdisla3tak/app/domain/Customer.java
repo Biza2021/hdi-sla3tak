@@ -1,6 +1,7 @@
 package com.hdisla3tak.app.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,8 +18,13 @@ public class Customer {
     @Column(nullable = false, length = 140)
     private String fullName;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(nullable = false, length = 30)
     private String phoneNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    @NotNull
+    private Shop shop;
 
     @Column(length = 30)
     private String secondaryPhoneNumber;
@@ -53,6 +59,8 @@ public class Customer {
     public void setFullName(String fullName) { this.fullName = fullName; }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public Shop getShop() { return shop; }
+    public void setShop(Shop shop) { this.shop = shop; }
     public String getSecondaryPhoneNumber() { return secondaryPhoneNumber; }
     public void setSecondaryPhoneNumber(String secondaryPhoneNumber) { this.secondaryPhoneNumber = secondaryPhoneNumber; }
     public String getNotes() { return notes; }

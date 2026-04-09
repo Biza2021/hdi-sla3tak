@@ -4,7 +4,7 @@
     <div class="row g-3 g-lg-4">
         <div class="col-lg-5">
             <div class="card-surface p-4 h-100">
-                <img class="detail-image mb-3" th:src="${item.imagePath != null} ? @{/uploads/{path}(path=${item.imagePath})} : @{/img/placeholder-item.svg}" alt="item">
+                <img class="detail-image mb-3" th:src="${item.imagePath != null} ? @{/{shopSlug}/items/{id}/image(shopSlug=${currentShopSlug},id=${item.id})} : @{/img/placeholder-item.svg}" alt="item">
                 <div class="detail-row"><span th:text="#{items.itemTitle}">Item</span><strong th:text="${item.title}"></strong></div>
                 <div class="detail-row"><span th:text="#{items.customer}">Customer</span><strong th:text="${item.customer.fullName}"></strong></div>
                 <div class="detail-row"><span th:text="#{customers.phone}">Phone</span><strong th:text="${item.customer.phoneNumber}"></strong></div>
@@ -15,7 +15,7 @@
             <div class="card-surface p-4">
                 <h3 class="section-title" th:text="#{deliver.heading}">Confirm delivery</h3>
                 <p class="text-secondary" th:text="#{deliver.help}">Before saving, compare the physical item with the photo and verify the customer's phone number and pickup code.</p>
-                <form th:action="@{/items/{id}/deliver(id=${item.id})}" th:object="${deliveryForm}" method="post" class="vstack gap-3">
+                <form th:action="@{/{shopSlug}/items/{id}/deliver(shopSlug=${currentShopSlug},id=${item.id})}" th:object="${deliveryForm}" method="post" class="vstack gap-3">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <div>
                         <label class="form-label" th:text="#{deliver.deliveredBy}">Delivered by</label>
@@ -29,7 +29,7 @@
                     </div>
                     <div class="d-flex gap-2 flex-wrap">
                         <button class="btn btn-primary rounded-pill px-4" th:text="#{delivery.confirmDelivery}">Mark as delivered</button>
-                        <a class="btn btn-outline-dark rounded-pill px-4" th:href="@{/items/{id}(id=${item.id})}" th:text="#{action.cancel}">Cancel</a>
+                        <a class="btn btn-outline-dark rounded-pill px-4" th:href="@{/{shopSlug}/items/{id}(shopSlug=${currentShopSlug},id=${item.id})}" th:text="#{action.cancel}">Cancel</a>
                     </div>
                 </form>
             </div>

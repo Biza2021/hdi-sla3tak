@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Locale;
 
 @Controller
-@RequestMapping("/customers")
+@RequestMapping("/{shopSlug}/customers")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -26,26 +26,31 @@ public class CustomerController {
     }
 
     @GetMapping
-    public String list(@RequestParam(value = "q", required = false) String q, Model model) {
+    public String list(@PathVariable String shopSlug,
+                       @RequestParam(value = "q", required = false) String q,
+                       Model model) {
         var customers = customerService.findAll(q);
         model.addAttribute("pageTitleKey", "customers.title");
         model.addAttribute("pageSubtitleKey", "customers.subtitle");
         model.addAttribute("customers", customers);
         model.addAttribute("repairCounts", customerService.getRepairCounts(customers));
         model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("shopSlug", shopSlug);
         return "customers/list";
     }
 
     @GetMapping("/new")
-    public String createForm(Model model) {
+    public String createForm(@PathVariable String shopSlug, Model model) {
         model.addAttribute("pageTitleKey", "customers.create.title");
         model.addAttribute("pageSubtitleKey", "customers.create.subtitle");
         model.addAttribute("customerForm", new CustomerForm());
+        model.addAttribute("shopSlug", shopSlug);
         return "customers/form";
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute("customerForm") CustomerForm form,
+    public String create(@PathVariable String shopSlug,
+                         @Valid @ModelAttribute("customerForm") CustomerForm form,
                          BindingResult bindingResult,
                          RedirectAttributes redirectAttributes,
                          Model model,
@@ -53,32 +58,35 @@ public class CustomerController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("pageTitleKey", "customers.create.title");
             model.addAttribute("pageSubtitleKey", "customers.create.subtitle");
+            model.addAttribute("shopSlug", shopSlug);
             return "customers/form";
         }
         try {
             Customer customer = customerService.create(form);
             redirectAttributes.addFlashAttribute("success", messageSource.getMessage("flash.customer.created", null, locale));
-            return "redirect:/customers/" + customer.getId();
+            return "redirect:/" + shopSlug + "/customers/" + customer.getId();
         } catch (IllegalArgumentException ex) {
             String key = "duplicate-phone".equals(ex.getMessage()) ? "validation.customer.phone.duplicate" : "validation.customer.phone.invalid";
             bindingResult.rejectValue("phoneNumber", "phone", messageSource.getMessage(key, null, locale));
             model.addAttribute("pageTitleKey", "customers.create.title");
             model.addAttribute("pageSubtitleKey", "customers.create.subtitle");
+            model.addAttribute("shopSlug", shopSlug);
             return "customers/form";
         }
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable String shopSlug, @PathVariable Long id, Model model) {
         Customer customer = customerService.getDetailById(id);
         model.addAttribute("pageTitleKey", "customers.detail.title");
         model.addAttribute("pageSubtitleKey", "customers.detail.subtitle");
         model.addAttribute("customer", customer);
+        model.addAttribute("shopSlug", shopSlug);
         return "customers/detail";
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String editForm(@PathVariable String shopSlug, @PathVariable Long id, Model model) {
         Customer customer = customerService.getById(id);
         CustomerForm form = new CustomerForm();
         form.setFullName(customer.getFullName());
@@ -89,11 +97,13 @@ public class CustomerController {
         model.addAttribute("customerForm", form);
         model.addAttribute("pageTitleKey", "customers.edit.title");
         model.addAttribute("pageSubtitleKey", "customers.edit.subtitle");
+        model.addAttribute("shopSlug", shopSlug);
         return "customers/form";
     }
 
     @PostMapping("/{id}")
-    public String update(@PathVariable Long id,
+    public String update(@PathVariable String shopSlug,
+                         @PathVariable Long id,
                          @Valid @ModelAttribute("customerForm") CustomerForm form,
                          BindingResult bindingResult,
                          RedirectAttributes redirectAttributes,
@@ -103,18 +113,20 @@ public class CustomerController {
             model.addAttribute("customer", customerService.getById(id));
             model.addAttribute("pageTitleKey", "customers.edit.title");
             model.addAttribute("pageSubtitleKey", "customers.edit.subtitle");
+            model.addAttribute("shopSlug", shopSlug);
             return "customers/form";
         }
         try {
             customerService.update(id, form);
             redirectAttributes.addFlashAttribute("success", messageSource.getMessage("flash.customer.updated", null, locale));
-            return "redirect:/customers/" + id;
+            return "redirect:/" + shopSlug + "/customers/" + id;
         } catch (IllegalArgumentException ex) {
             String key = "duplicate-phone".equals(ex.getMessage()) ? "validation.customer.phone.duplicate" : "validation.customer.phone.invalid";
             bindingResult.rejectValue("phoneNumber", "phone", messageSource.getMessage(key, null, locale));
             model.addAttribute("customer", customerService.getById(id));
             model.addAttribute("pageTitleKey", "customers.edit.title");
             model.addAttribute("pageSubtitleKey", "customers.edit.subtitle");
+            model.addAttribute("shopSlug", shopSlug);
             return "customers/form";
         }
     }

@@ -10,7 +10,7 @@
                 <button class="btn btn-dark w-100 rounded-pill" th:text="#{action.search}">Search</button>
             </div>
             <div class="col-6 col-md-auto">
-                <a class="btn btn-primary w-100 rounded-pill" th:href="@{/customers/new}" th:text="#{customers.add}">Add customer</a>
+                <a class="btn btn-primary w-100 rounded-pill" th:href="@{/{shopSlug}/customers/new(shopSlug=${currentShopSlug})}" th:text="#{customers.add}">Add customer</a>
             </div>
         </form>
 
@@ -24,7 +24,7 @@
                             <div class="small text-secondary" th:if="${customer.secondaryPhoneNumber}" th:text="${customer.secondaryPhoneNumber}"></div>
                             <div class="small text-secondary mt-2" th:text="#{customers.repairsCount(${repairCounts[customer.id]})}">0 repairs</div>
                         </div>
-                        <a class="btn btn-sm btn-outline-dark rounded-pill" th:href="@{/customers/{id}(id=${customer.id})}" th:text="#{action.view}">View</a>
+                        <a class="btn btn-sm btn-outline-dark rounded-pill" th:href="@{/{shopSlug}/customers/{id}(shopSlug=${currentShopSlug},id=${customer.id})}" th:text="#{action.view}">View</a>
                     </div>
                 </div>
             </div>

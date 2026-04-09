@@ -3,6 +3,7 @@ package com.hdisla3tak.app.domain;
 import com.hdisla3tak.app.domain.enums.ItemCategory;
 import com.hdisla3tak.app.domain.enums.RepairStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,6 +28,11 @@ public class RepairItem {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id")
+    @NotNull
+    private Shop shop;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
     private ItemCategory category;
@@ -50,7 +56,7 @@ public class RepairItem {
     @Column(nullable = false, length = 40)
     private RepairStatus status = RepairStatus.RECEIVED;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, length = 20)
     private String pickupCode;
 
     @Column(name = "public_tracking_token", unique = true, length = 64)
@@ -105,6 +111,8 @@ public class RepairItem {
     public void setId(Long id) { this.id = id; }
     public Customer getCustomer() { return customer; }
     public void setCustomer(Customer customer) { this.customer = customer; }
+    public Shop getShop() { return shop; }
+    public void setShop(Shop shop) { this.shop = shop; }
     public ItemCategory getCategory() { return category; }
     public void setCategory(ItemCategory category) { this.category = category; }
     public String getTitle() { return title; }
