@@ -33,7 +33,7 @@ public class SecurityConfig {
                                                    LogoutSuccessHandler logoutSuccessHandler) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico", "/login", "/setup", "/setup/**", "/shops/**", "/track/**", "/healthz", "/error/**", "/h2-console/**", "/*/login").permitAll()
+                .requestMatchers("/", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/login", "/setup", "/setup/**", "/shops/**", "/track/**", "/healthz", "/error/**", "/h2-console/**", "/*/login").permitAll()
                 .requestMatchers("/*/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
@@ -93,8 +93,8 @@ public class SecurityConfig {
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint(ShopService shopService) {
         return (request, response, authException) -> {
-            if (request.getRequestURI().equals("/")) {
-                response.sendRedirect("/login");
+            if (!shopService.hasAnyShops()) {
+                response.sendRedirect("/shops/new");
                 return;
             }
 
@@ -104,7 +104,20 @@ public class SecurityConfig {
                 return;
             }
 
-            response.sendRedirect("/login");
+            if (request.getRequestURI().equals("/")) {
+                shopService.findSingleShop()
+                    .ifPresentOrElse(
+                        shop -> sendRedirect(response, "/" + shop.getSlug() + "/login"),
+                        () -> sendNotFound(response)
+                    );
+                return;
+            }
+
+            shopService.findSingleShop()
+                .ifPresentOrElse(
+                    shop -> sendRedirect(response, "/" + shop.getSlug() + "/login"),
+                    () -> sendNotFound(response)
+                );
         };
     }
 
@@ -115,7 +128,7 @@ public class SecurityConfig {
 
     private String resolveShopHome(Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof ShopUserPrincipal principal) {
-            return "/" + principal.getShopSlug();
+            return "/" + principal.getShopSlug() + "/dashboard";
         }
         return "/";
     }
@@ -132,5 +145,21 @@ public class SecurityConfig {
 
     private String trimToNull(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private void sendRedirect(jakarta.servlet.http.HttpServletResponse response, String target) {
+        try {
+            response.sendRedirect(target);
+        } catch (java.io.IOException ex) {
+            throw new IllegalStateException("Failed to redirect to " + target, ex);
+        }
+    }
+
+    private void sendNotFound(jakarta.servlet.http.HttpServletResponse response) {
+        try {
+            response.sendError(jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND);
+        } catch (java.io.IOException ex) {
+            throw new IllegalStateException("Failed to send 404 response.", ex);
+        }
     }
 }
