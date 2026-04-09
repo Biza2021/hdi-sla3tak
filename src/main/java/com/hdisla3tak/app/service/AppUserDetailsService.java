@@ -4,6 +4,7 @@ import com.hdisla3tak.app.domain.AppUser;
 import com.hdisla3tak.app.security.ShopUserPrincipal;
 import com.hdisla3tak.app.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Optional;
@@ -17,6 +18,7 @@ public class AppUserDetailsService {
         this.userRepository = userRepository;
     }
 
+    @Transactional(readOnly = true)
     public Optional<ShopUserPrincipal> loadUserByUsernameAndShopSlug(String username, String shopSlug) {
         if (!StringUtils.hasText(username) || !StringUtils.hasText(shopSlug)) {
             return Optional.empty();

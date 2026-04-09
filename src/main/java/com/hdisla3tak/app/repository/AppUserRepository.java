@@ -3,7 +3,6 @@ package com.hdisla3tak.app.repository;
 import com.hdisla3tak.app.domain.AppUser;
 import com.hdisla3tak.app.domain.Shop;
 import com.hdisla3tak.app.domain.enums.UserRole;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,8 +15,15 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUsernameIgnoreCase(String username);
     boolean existsByUsernameIgnoreCase(String username);
 
-    @EntityGraph(attributePaths = "shop")
-    Optional<AppUser> findByUsernameIgnoreCaseAndShop_SlugIgnoreCase(String username, String shopSlug);
+    @Query("""
+        select u
+        from AppUser u
+        join fetch u.shop s
+        where lower(u.username) = lower(:username)
+          and lower(s.slug) = lower(:shopSlug)
+        """)
+    Optional<AppUser> findByUsernameIgnoreCaseAndShop_SlugIgnoreCase(@Param("username") String username,
+                                                                     @Param("shopSlug") String shopSlug);
 
     Optional<AppUser> findByUsernameIgnoreCaseAndShop_Id(String username, Long shopId);
     boolean existsByUsernameIgnoreCaseAndShop_Id(String username, Long shopId);
