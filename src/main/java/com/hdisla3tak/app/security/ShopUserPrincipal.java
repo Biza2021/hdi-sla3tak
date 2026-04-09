@@ -20,14 +20,34 @@ public class ShopUserPrincipal implements UserDetails {
     private final List<GrantedAuthority> authorities;
 
     public ShopUserPrincipal(AppUser user) {
-        this.userId = user.getId();
-        this.shopId = user.getShop().getId();
-        this.shopSlug = user.getShop().getSlug();
-        this.fullName = user.getFullName();
-        this.username = user.getUsername();
-        this.passwordHash = user.getPasswordHash();
-        this.active = user.isActive();
-        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        this(
+            user.getId(),
+            user.getShop().getId(),
+            user.getShop().getSlug(),
+            user.getFullName(),
+            user.getUsername(),
+            user.getPasswordHash(),
+            user.isActive(),
+            user.getRole().name()
+        );
+    }
+
+    public ShopUserPrincipal(Long userId,
+                             Long shopId,
+                             String shopSlug,
+                             String fullName,
+                             String username,
+                             String passwordHash,
+                             boolean active,
+                             String roleName) {
+        this.userId = userId;
+        this.shopId = shopId;
+        this.shopSlug = shopSlug;
+        this.fullName = fullName;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.active = active;
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + roleName));
     }
 
     public Long getUserId() {
